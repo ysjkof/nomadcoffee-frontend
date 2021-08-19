@@ -14,6 +14,8 @@ import NotFound from "./screens/NotFound";
 import SignUp from "./screens/SignUp";
 import { HelmetProvider } from "react-helmet-async";
 import routes from "./routes";
+import CreateShop from "./screens/CreateShop";
+import ShopProfile from "./screens/ShopProfile";
 
 function App() {
   const isLoggedIn = useReactiveVar(isLoggedInVar);
@@ -28,6 +30,12 @@ function App() {
             <Switch>
               <Route path={routes.home} exact>
                 <Home />
+              </Route>
+              <Route path={routes.add}>
+                <CreateShop />
+              </Route>
+              <Route path={routes.shop}>
+                <ShopProfile />
               </Route>
               <Route path={routes.login}>
                 {isLoggedIn ? Redirect(routes.home) : <Login />}
