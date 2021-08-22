@@ -6,11 +6,12 @@ export const BaseBox = styled.div`
   width: 100%;
 `;
 
-export const FatLink = styled.span`
+export const FatLink = styled.div`
   font-weight: 600;
+  font-size: 16px;
   color: rgb(142, 142, 142);
 `;
 
-export const FatText = styled.span`
+export const FatText = styled.div`
   font-weight: 600;
 `;

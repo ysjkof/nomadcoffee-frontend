@@ -1,5 +1,5 @@
 import { gql, useMutation } from "@apollo/client";
-import { faCoffee } from "@fortawesome/free-solid-svg-icons";
+import { faInstagram } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
@@ -12,13 +12,14 @@ import Input from "../components/auth/Input";
 import PageTitle from "../components/PageTitle";
 import { FatLink } from "../components/shared";
 import routes from "../routes";
+import FormError from "../components/auth/FormError";
+import Logo from "../components/Logo";
 
 const HeaderContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
-
 const Subtitle = styled(FatLink)`
   font-size: 16px;
   text-align: center;
@@ -27,17 +28,15 @@ const Subtitle = styled(FatLink)`
 
 const CREATE_ACCOUNT_MUTATION = gql`
   mutation createAccount(
+    $name: String!
     $username: String!
     $email: String!
-    $name: String!
-    $location: String
     $password: String!
   ) {
     createAccount(
+      name: $name
       username: $username
       email: $email
-      name: $name
-      location: $location
       password: $password
     ) {
       ok
@@ -48,25 +47,26 @@ const CREATE_ACCOUNT_MUTATION = gql`
 
 function SingUp() {
   const history = useHistory();
+  const { register, handleSubmit, errors, formState, getValues, setError } =
+    useForm({
+      mode: "onChange",
+    });
   const onCompleted = (data) => {
     const { username, password } = getValues();
     const {
-      createAccount: { ok },
+      createAccount: { ok, error },
     } = data;
     if (!ok) {
-      return;
+      return setError("result", { message: error });
     }
-    history.push(routes.login, {
-      message: "Account created. Please log in.",
+    history.push(routes.home, {
+      message: "Account Created. Please Login",
       username,
       password,
     });
   };
   const [createAccount, { loading }] = useMutation(CREATE_ACCOUNT_MUTATION, {
     onCompleted,
-  });
-  const { register, handleSubmit, formState, getValues } = useForm({
-    mode: "onChange",
   });
   const onSubmitValid = (data) => {
     if (loading) {
@@ -78,22 +78,16 @@ function SingUp() {
       },
     });
   };
+
   return (
     <AuthLayout>
       <PageTitle title="Sign up" />
       <FormBox>
         <HeaderContainer>
-          <FontAwesomeIcon icon={faCoffee} size="3x" />
-          <Subtitle>Sign up to registration The Coffee Shop.</Subtitle>
+          <Logo />
         </HeaderContainer>
         <form onSubmit={handleSubmit(onSubmitValid)}>
-          <Input
-            {...register("username", {
-              required: "User Name is required.",
-            })}
-            type="text"
-            placeholder="User Name"
-          />
+          <Input {...register("name")} type="text" placeholder="Name" />
           <Input
             {...register("email", {
               required: "Email is required.",
@@ -101,20 +95,19 @@ function SingUp() {
             type="text"
             placeholder="Email"
           />
+          <FormError message={formState.errors?.email?.message} />
           <Input
-            {...register("name", {
-              required: "Name is required.",
+            {...register("username", {
+              required: "Username is required.",
+              minLength: {
+                value: 5,
+                message: "Username should be longer than 5 chars",
+              },
             })}
             type="text"
-            placeholder="Name"
+            placeholder="Username"
           />
-          {/* <Input
-            {...register("location", {
-              required: "Location is required.",
-            })}
-            type="text"
-            placeholder="Location"
-          /> */}
+          <FormError message={formState.errors?.username?.message} />
           <Input
             {...register("password", {
               required: "Password is required.",
@@ -122,14 +115,17 @@ function SingUp() {
             type="password"
             placeholder="Password"
           />
+
+          <FormError message={formState.errors?.password?.message} />
           <Button
             type="submit"
             value={loading ? "Loading..." : "Sign up"}
             disabled={!formState.isValid || loading}
           />
+          <FormError message={formState.errors?.result?.message} />
         </form>
       </FormBox>
-      <BottomBox cta="Have an account?" linkText="Log in" link={routes.login} />
+      <BottomBox cta="Have an account?" linkText="Log in" link={routes.home} />
     </AuthLayout>
   );
 }

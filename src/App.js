@@ -1,26 +1,20 @@
 import { ApolloProvider, useReactiveVar } from "@apollo/client";
-import {
-  BrowserRouter as Router,
-  Redirect,
-  Route,
-  Switch,
-} from "react-router-dom";
-import { ThemeProvider } from "styled-components";
-import { client, darkModeVar, isLoggedInVar } from "./apollo";
-import { darkTheme, GlobalStyles, lightTheme } from "./styles";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Home from "./screens/Home";
 import Login from "./screens/Login";
 import NotFound from "./screens/NotFound";
+import { client, darkModeVar, isLoggedInVar } from "./apollo";
+import { ThemeProvider } from "styled-components";
+import { darkTheme, lightTheme, GlobalStyles } from "./styles";
 import SignUp from "./screens/SignUp";
-import { HelmetProvider } from "react-helmet-async";
 import routes from "./routes";
-import CreateShop from "./screens/CreateShop";
-import ShopProfile from "./screens/ShopProfile";
+import { HelmetProvider } from "react-helmet-async";
+import Layout from "./components/Layout";
+import AddShop from "./screens/AddShop";
 
 function App() {
   const isLoggedIn = useReactiveVar(isLoggedInVar);
   const darkMode = useReactiveVar(darkModeVar);
-
   return (
     <ApolloProvider client={client}>
       <HelmetProvider>
@@ -29,20 +23,26 @@ function App() {
           <Router>
             <Switch>
               <Route path={routes.home} exact>
-                <Home />
+                {isLoggedIn ? (
+                  <Layout>
+                    <Home />
+                  </Layout>
+                ) : (
+                  <Login />
+                )}
               </Route>
-              <Route path={routes.add}>
-                <CreateShop />
+              <Route path={routes.add} exact>
+                <Layout>
+                  <AddShop />
+                </Layout>
               </Route>
-              <Route path={routes.shop}>
-                <ShopProfile />
-              </Route>
-              <Route path={routes.login}>
-                {isLoggedIn ? Redirect(routes.home) : <Login />}
-              </Route>
-              <Route path={routes.signup}>
-                <SignUp />
-              </Route>
+
+              {!isLoggedIn ? (
+                <Route path={routes.signup}>
+                  <SignUp />
+                </Route>
+              ) : null}
+
               <Route>
                 <NotFound />
               </Route>
@@ -53,5 +53,4 @@ function App() {
     </ApolloProvider>
   );
 }
-
 export default App;
